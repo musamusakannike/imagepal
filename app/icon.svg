@@ -1,0 +1,43 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background Gradient - Using the app's cinematic dark surface colors -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#08080a" />
+      <stop offset="100%" stop-color="#141418" />
+    </linearGradient>
+    
+    <!-- Image gradient - Using the app's warm amber/orange accent -->
+    <linearGradient id="imgBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0b85c" />
+      <stop offset="100%" stop-color="#e8a849" />
+    </linearGradient>
+
+    <!-- Sun gradient - Glowing white to accent amber -->
+    <linearGradient id="sun" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f0b85c" />
+    </linearGradient>
+
+    <clipPath id="imgClip">
+      <rect x="120" y="120" width="272" height="272" rx="48" />
+    </clipPath>
+  </defs>
+
+  <!-- App Icon Base -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Inner Image Container -->
+  <rect x="120" y="120" width="272" height="272" rx="48" fill="url(#imgBg)"/>
+  
+  <g clip-path="url(#imgClip)">
+    <!-- Sun -->
+    <circle cx="310" cy="200" r="44" fill="url(#sun)"/>
+    
+    <!-- Mountains / Landscape -->
+    <path d="M80 420 L210 240 L280 330 L340 260 L440 420 Z" fill="#ffffff" opacity="0.9"/>
+    <path d="M180 420 L280 290 L340 370 L420 280 L480 420 Z" fill="#ffffff" opacity="0.4"/>
+  </g>
+
+  <!-- Glassy Border Overlay -->
+  <rect x="120" y="120" width="272" height="272" rx="48" fill="none" stroke="#ffffff" stroke-width="12" stroke-opacity="0.2"/>
+</svg>
