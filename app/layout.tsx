@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Syne } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const syne = Syne({
@@ -89,7 +90,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${syne.variable} h-full`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
