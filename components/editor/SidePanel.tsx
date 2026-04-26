@@ -6,6 +6,7 @@ import { CropPanel } from './CropPanel';
 import { ResizePanel } from './ResizePanel';
 import { LayerPanel } from './LayerPanel';
 import { ExportPanel } from './ExportPanel';
+import { AiPanel } from './AiPanel';
 import { useIsMobile } from '@/lib/hooks';
 import { X } from 'lucide-react';
 
@@ -14,7 +15,7 @@ export function SidePanel() {
   const isMobile = useIsMobile();
 
   // Only show panel for tools that need it
-  const showPanel = ['crop', 'filters', 'adjust', 'resize', 'layers', 'export'].includes(
+  const showPanel = ['crop', 'filters', 'adjust', 'resize', 'layers', 'export', 'ai'].includes(
     state.activeTool
   );
 
@@ -60,6 +61,7 @@ export function SidePanel() {
             {state.activeTool === 'resize' && <ResizePanel />}
             {state.activeTool === 'layers' && <LayerPanel />}
             {state.activeTool === 'export' && <ExportPanel />}
+            {state.activeTool === 'ai' && <AiPanel />}
           </div>
         </motion.div>
       </AnimatePresence>
@@ -89,6 +91,7 @@ export function SidePanel() {
           {state.activeTool === 'resize' && <ResizePanel />}
           {state.activeTool === 'layers' && <LayerPanel />}
           {state.activeTool === 'export' && <ExportPanel />}
+          {state.activeTool === 'ai' && <AiPanel />}
         </motion.div>
       </AnimatePresence>
     </div>

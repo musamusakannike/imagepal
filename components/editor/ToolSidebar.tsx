@@ -9,7 +9,8 @@ import {
   Layers,
   Download,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Wand2
 } from 'lucide-react';
 import { useEditorActions } from '@/lib/editor-context';
 import type { EditorTool } from '@/lib/types';
@@ -19,6 +20,7 @@ import { useIsMobile } from '@/lib/hooks';
 const TOOLS: { id: EditorTool; icon: typeof MousePointer2; label: string; shortcut: string }[] = [
   { id: 'select', icon: MousePointer2, label: 'Select', shortcut: 'V' },
   { id: 'crop', icon: Crop, label: 'Crop', shortcut: 'C' },
+  { id: 'ai', icon: Wand2, label: 'AI Magic', shortcut: 'M' },
   { id: 'filters', icon: Sparkles, label: 'Filters', shortcut: 'F' },
   { id: 'adjust', icon: SlidersHorizontal, label: 'Adjust', shortcut: 'A' },
   { id: 'resize', icon: Maximize, label: 'Resize', shortcut: 'R' },
