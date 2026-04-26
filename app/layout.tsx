@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "ImagePal — Professional Local Image Editor",
     description: "Edit images professionally directly in your browser. Fast, secure, and local-first.",
-    url: "https://imagepal.vercel.app",
+    url: "https://imagepal.codiac.online",
     siteName: "ImagePal",
     images: [
       {
@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://imagepal.vercel.app",
+    canonical: "https://imagepal.codiac.online",
   },
   manifest: "/manifest.json",
 };

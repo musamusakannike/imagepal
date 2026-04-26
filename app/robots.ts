@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: "/private/",
     },
-    sitemap: "https://imagepal.vercel.app/sitemap.xml",
+    sitemap: "https://imagepal.codiac.online/sitemap.xml",
   };
 }
