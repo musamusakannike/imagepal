@@ -1,8 +1,5 @@
-'use client';
-
-/* ─── Left Tool Sidebar ─── */
-
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   MousePointer2,
   Crop,
@@ -11,6 +8,8 @@ import {
   Maximize,
   Layers,
   Download,
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 import { useEditorActions } from '@/lib/editor-context';
 import type { EditorTool } from '@/lib/types';
@@ -28,62 +27,155 @@ const TOOLS: { id: EditorTool; icon: typeof MousePointer2; label: string; shortc
 
 export function ToolSidebar() {
   const { state, setTool } = useEditorActions();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div
-      className="w-14 flex flex-col items-center py-3 gap-1 shrink-0"
+    <motion.div
+      initial={false}
+      animate={{ width: isExpanded ? 200 : 56 }}
+      className="flex flex-col items-center py-3 shrink-0 h-full relative z-20"
       style={{
         background: 'var(--surface-1)',
         borderRight: '1px solid var(--border)',
       }}
     >
-      {TOOLS.map((tool) => {
-        const isActive = state.activeTool === tool.id;
-        const Icon = tool.icon;
+      <div className="flex flex-col gap-1 w-full px-2 flex-1">
+        {TOOLS.map((tool) => {
+          const isActive = state.activeTool === tool.id;
+          const Icon = tool.icon;
 
-        return (
-          <motion.button
-            key={tool.id}
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
-            onClick={() => setTool(tool.id)}
-            title={`${tool.label} (${tool.shortcut})`}
-            className="relative w-10 h-10 flex items-center justify-center rounded-xl cursor-pointer"
-            style={{
-              background: isActive ? 'var(--accent-muted)' : 'transparent',
-              color: isActive ? 'var(--accent)' : 'var(--text-tertiary)',
-              border: 'none',
-              transition: 'all var(--duration-fast) var(--ease-out)',
-            }}
-            onMouseEnter={(e) => {
-              if (!isActive) {
-                e.currentTarget.style.background = 'var(--surface-3)';
-                e.currentTarget.style.color = 'var(--text-primary)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isActive) {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = 'var(--text-tertiary)';
-              }
-            }}
-          >
-            {isActive && (
-              <motion.div
-                layoutId="tool-indicator"
-                className="absolute inset-0 rounded-xl"
-                style={{
-                  background: 'var(--accent-muted)',
-                  border: '1px solid var(--accent)',
-                  borderColor: 'var(--accent-muted)',
-                }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              />
-            )}
-            <Icon size={18} className="relative z-10" />
-          </motion.button>
-        );
-      })}
-    </div>
+          return (
+            <motion.button
+              key={tool.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setTool(tool.id)}
+              className={cn(
+                "relative group flex items-center rounded-xl cursor-pointer",
+                isExpanded ? "w-full h-10 px-3 justify-start" : "w-10 h-10 mx-auto justify-center"
+              )}
+              style={{
+                background: isActive ? 'var(--accent-muted)' : 'transparent',
+                color: isActive ? 'var(--accent)' : 'var(--text-tertiary)',
+                border: 'none',
+                transition: 'all var(--duration-fast) var(--ease-out)',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'var(--surface-3)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-tertiary)';
+                }
+              }}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="tool-indicator"
+                  className="absolute inset-0 rounded-xl"
+                  style={{
+                    background: 'var(--accent-muted)',
+                    border: '1px solid var(--accent)',
+                    borderColor: 'var(--accent-muted)',
+                  }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              )}
+              <div className={cn("relative z-10 flex items-center w-full min-w-0", !isExpanded && "justify-center")}>
+                <Icon size={18} className="shrink-0" />
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ opacity: 0, width: 0, marginLeft: 0 }}
+                      animate={{ opacity: 1, width: 'auto', marginLeft: 12 }}
+                      exit={{ opacity: 0, width: 0, marginLeft: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex items-center justify-between flex-1 overflow-hidden whitespace-nowrap"
+                    >
+                      <span className="text-sm font-medium">{tool.label}</span>
+                      <span className="text-xs opacity-50 ml-2">{tool.shortcut}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {!isExpanded && (
+                <div
+                  className="absolute left-[calc(100%+12px)] top-1/2 -translate-y-1/2 px-2.5 py-1.5 rounded-lg text-xs font-medium opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap flex items-center gap-2 shadow-sm"
+                  style={{
+                    background: 'var(--surface-3)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  {tool.label}
+                  <span className="opacity-50 text-[10px]">{tool.shortcut}</span>
+                </div>
+              )}
+            </motion.button>
+          );
+        })}
+      </div>
+
+      <div className="w-full px-2 mt-auto pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setIsExpanded(!isExpanded)}
+          className={cn(
+            "relative group flex items-center rounded-xl cursor-pointer",
+            isExpanded ? "w-full h-10 px-3 justify-start" : "w-10 h-10 mx-auto justify-center"
+          )}
+          style={{
+            background: 'transparent',
+            color: 'var(--text-tertiary)',
+            border: 'none',
+            transition: 'all var(--duration-fast) var(--ease-out)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--surface-3)';
+            e.currentTarget.style.color = 'var(--text-primary)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = 'var(--text-tertiary)';
+          }}
+        >
+          <div className={cn("relative z-10 flex items-center w-full min-w-0", !isExpanded && "justify-center")}>
+            {isExpanded ? <ChevronLeft size={18} className="shrink-0" /> : <ChevronRight size={18} className="shrink-0" />}
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.div
+                  initial={{ opacity: 0, width: 0, marginLeft: 0 }}
+                  animate={{ opacity: 1, width: 'auto', marginLeft: 12 }}
+                  exit={{ opacity: 0, width: 0, marginLeft: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center flex-1 overflow-hidden whitespace-nowrap"
+                >
+                  <span className="text-sm font-medium">Collapse</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {!isExpanded && (
+            <div
+              className="absolute left-[calc(100%+12px)] top-1/2 -translate-y-1/2 px-2.5 py-1.5 rounded-lg text-xs font-medium opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap flex items-center gap-2 shadow-sm"
+              style={{
+                background: 'var(--surface-3)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)',
+              }}
+            >
+              Expand
+            </div>
+          )}
+        </motion.button>
+      </div>
+    </motion.div>
   );
 }
