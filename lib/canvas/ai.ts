@@ -1,4 +1,4 @@
-import removeBackground, { Config } from '@imgly/background-removal';
+import { removeBackground, Config } from '@imgly/background-removal';
 
 /**
  * Removes background from an ImageData object
@@ -23,14 +23,14 @@ export async function removeImageBackground(
   });
 
   const config: Config = {
-    progress: (key, current, total) => {
+    progress: (key: string, current: number, total: number) => {
       if (onProgress) {
         const step = key.split(':').pop() || key;
         const percent = Math.round((current / total) * 100);
         onProgress(`${step} (${percent}%)`);
       }
     },
-    publicPath: 'https://staticimgly.com/@imgly/background-removal-data/1.4.5/dist/', // CDN for WASM assets to avoid local setup complexity for now
+    publicPath: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/', // CDN for WASM assets to avoid local setup complexity for now
   };
 
   const resultBlob = await removeBackground(blob, config);
