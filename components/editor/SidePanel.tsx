@@ -1,8 +1,3 @@
-'use client';
-
-/* ─── Right Side Panel ─── */
-/* Renders the appropriate tool panel based on active tool */
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEditorActions } from '@/lib/editor-context';
 import { FilterPanel } from './FilterPanel';
@@ -11,9 +6,12 @@ import { CropPanel } from './CropPanel';
 import { ResizePanel } from './ResizePanel';
 import { LayerPanel } from './LayerPanel';
 import { ExportPanel } from './ExportPanel';
+import { useIsMobile } from '@/lib/hooks';
+import { X } from 'lucide-react';
 
 export function SidePanel() {
-  const { state } = useEditorActions();
+  const { state, setTool } = useEditorActions();
+  const isMobile = useIsMobile();
 
   // Only show panel for tools that need it
   const showPanel = ['crop', 'filters', 'adjust', 'resize', 'layers', 'export'].includes(
@@ -21,6 +19,52 @@ export function SidePanel() {
   );
 
   if (!showPanel) return null;
+
+  if (isMobile) {
+    return (
+      <AnimatePresence>
+        <motion.div
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="fixed inset-x-0 bottom-[72px] z-40 max-h-[60vh] flex flex-col overflow-hidden"
+          style={{
+            background: 'var(--surface-1)',
+            borderTop: '1px solid var(--border)',
+            borderTopLeftRadius: 'var(--radius-xl)',
+            borderTopRightRadius: 'var(--radius-xl)',
+            boxShadow: '0 -8px 32px rgba(0,0,0,0.4)',
+          }}
+        >
+          {/* Handle bar */}
+          <div className="w-full flex flex-col items-center py-2 shrink-0">
+            <div className="w-10 h-1.5 rounded-full bg-white/10" />
+            <div className="w-full flex items-center justify-between px-4 mt-1">
+              <span className="text-sm font-bold uppercase tracking-widest text-accent">
+                {state.activeTool}
+              </span>
+              <button 
+                onClick={() => setTool('select')}
+                className="p-1 rounded-full hover:bg-white/5 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-4 pb-8">
+            {state.activeTool === 'crop' && <CropPanel />}
+            {state.activeTool === 'filters' && <FilterPanel />}
+            {state.activeTool === 'adjust' && <AdjustmentPanel />}
+            {state.activeTool === 'resize' && <ResizePanel />}
+            {state.activeTool === 'layers' && <LayerPanel />}
+            {state.activeTool === 'export' && <ExportPanel />}
+          </div>
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
 
   return (
     <div

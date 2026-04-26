@@ -14,6 +14,7 @@ import {
 import { useEditorActions } from '@/lib/editor-context';
 import type { EditorTool } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/lib/hooks';
 
 const TOOLS: { id: EditorTool; icon: typeof MousePointer2; label: string; shortcut: string }[] = [
   { id: 'select', icon: MousePointer2, label: 'Select', shortcut: 'V' },
@@ -28,6 +29,59 @@ const TOOLS: { id: EditorTool; icon: typeof MousePointer2; label: string; shortc
 export function ToolSidebar() {
   const { state, setTool } = useEditorActions();
   const [isExpanded, setIsExpanded] = useState(false);
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <div
+        className="shrink-0 z-30 pb-safe"
+        style={{
+          background: 'var(--surface-1)',
+          borderTop: '1px solid var(--border)',
+        }}
+      >
+        <div className="flex items-center overflow-x-auto no-scrollbar px-4 py-2 gap-4">
+          {TOOLS.map((tool) => {
+            const isActive = state.activeTool === tool.id;
+            const Icon = tool.icon;
+
+            return (
+              <motion.button
+                key={tool.id}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setTool(tool.id)}
+                className="flex flex-col items-center gap-1 shrink-0 min-w-[56px]"
+                style={{
+                  color: isActive ? 'var(--accent)' : 'var(--text-tertiary)',
+                  border: 'none',
+                  background: 'none',
+                }}
+              >
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center relative"
+                  style={{
+                    background: isActive ? 'var(--accent-muted)' : 'transparent',
+                    transition: 'all var(--duration-fast) var(--ease-out)',
+                  }}
+                >
+                  <Icon size={20} />
+                  {isActive && (
+                    <motion.div
+                      layoutId="mobile-tool-indicator"
+                      className="absolute -bottom-1 w-1 h-1 rounded-full bg-current"
+                    />
+                  )}
+                </div>
+                <span className="text-[10px] font-medium uppercase tracking-wider">
+                  {tool.label}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div

@@ -1,7 +1,3 @@
-'use client';
-
-/* ─── Top Toolbar ─── */
-
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
@@ -17,11 +13,13 @@ import {
 import { useEditorActions } from '@/lib/editor-context';
 import { canUndo, canRedo } from '@/lib/canvas/history';
 import { formatDimensions, formatFileSize } from '@/lib/utils';
+import { useIsMobile } from '@/lib/hooks';
 import toast from 'react-hot-toast';
 
 export function Toolbar() {
   const { state, undo, redo, setZoom, setTool } = useEditorActions();
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   const zoomIn = () => setZoom(Math.min(5, state.zoom * 1.25));
   const zoomOut = () => setZoom(Math.max(0.1, state.zoom / 1.25));
@@ -29,8 +27,66 @@ export function Toolbar() {
 
   const handleExport = () => {
     setTool('export');
-    toast('Configure export in the right panel', { icon: '📦' });
+    if (!isMobile) {
+      toast('Configure export in the right panel', { icon: '📦' });
+    }
   };
+
+  if (isMobile) {
+    return (
+      <div
+        className="h-14 flex items-center justify-between px-4 shrink-0 z-40"
+        style={{
+          background: 'var(--surface-1)',
+          borderBottom: '1px solid var(--border)',
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => router.push('/')}
+            className="p-2 -ml-2 rounded-full hover:bg-white/5"
+          >
+            <Home size={18} />
+          </button>
+          <div className="flex flex-col">
+            <span className="text-xs font-bold uppercase tracking-widest text-accent leading-tight">
+              ImagePal
+            </span>
+            <span className="text-[10px] text-tertiary truncate max-w-[120px]">
+              {state.image?.name || 'Untitled'}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <ToolbarButton
+            icon={<Undo2 size={18} />}
+            tooltip="Undo"
+            disabled={!canUndo(state.historyIndex)}
+            onClick={undo}
+          />
+          <ToolbarButton
+            icon={<Redo2 size={18} />}
+            tooltip="Redo"
+            disabled={!canRedo(state.history, state.historyIndex)}
+            onClick={redo}
+          />
+          <div className="w-px h-4 mx-1 bg-white/10" />
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={handleExport}
+            className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider"
+            style={{
+              background: 'var(--accent)',
+              color: 'var(--text-inverse)',
+            }}
+          >
+            Export
+          </motion.button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

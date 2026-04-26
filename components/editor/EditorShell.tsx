@@ -6,6 +6,7 @@
 import { useEffect } from 'react';
 import { useEditorActions } from '@/lib/editor-context';
 import type { EditorTool } from '@/lib/types';
+import { useIsMobile } from '@/lib/hooks';
 import { Toolbar } from './Toolbar';
 import { ToolSidebar } from './ToolSidebar';
 import { EditorCanvas } from './EditorCanvas';
@@ -23,6 +24,7 @@ const TOOL_SHORTCUTS: Record<string, EditorTool> = {
 
 export function EditorShell() {
   const { state, setTool, undo, redo } = useEditorActions();
+  const isMobile = useIsMobile();
 
   // Global keyboard shortcuts
   useEffect(() => {
@@ -54,6 +56,29 @@ export function EditorShell() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [setTool, undo, redo]);
+
+  if (isMobile) {
+    return (
+      <div
+        className="h-screen w-screen flex flex-col overflow-hidden select-none"
+        style={{ background: 'var(--surface-0)' }}
+      >
+        {/* Mobile Header */}
+        <Toolbar />
+
+        {/* Canvas Area - Priority space on mobile */}
+        <div className="flex-1 relative overflow-hidden">
+          <EditorCanvas />
+        </div>
+
+        {/* Tool Options (Bottom Sheet style) */}
+        <SidePanel />
+
+        {/* Bottom Tool Navigation */}
+        <ToolSidebar />
+      </div>
+    );
+  }
 
   return (
     <div

@@ -1,12 +1,8 @@
-'use client';
-
-/* ─── Editor Canvas ─── */
-/* Main canvas viewport with zoom/pan and layer compositing */
-
 import { useRef, useEffect, useCallback, useState } from 'react';
 import { useEditorActions } from '@/lib/editor-context';
 import { applyAdjustments } from '@/lib/canvas/adjustments';
 import { compositeLayers } from '@/lib/canvas/layers';
+import { useIsMobile } from '@/lib/hooks';
 
 export function EditorCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -14,6 +10,21 @@ export function EditorCanvas() {
   const { state, setZoom, setPan } = useEditorActions();
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
+  const lastTouchDistRef = useRef<number | null>(null);
+  const isMobile = useIsMobile();
+
+  // Initial fit to screen on mobile
+  useEffect(() => {
+    if (isMobile && state.image && state.zoom === 1) {
+      const container = containerRef.current;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const scaleX = (rect.width - 40) / state.image.width;
+      const scaleY = (rect.height - 40) / state.image.height;
+      const fitZoom = Math.min(scaleX, scaleY, 1);
+      setZoom(fitZoom);
+    }
+  }, [isMobile, state.image, setZoom]); // Only run when image loads or becomes mobile
 
   // Render the canvas
   const render = useCallback(() => {
@@ -115,7 +126,7 @@ export function EditorCanvas() {
     [state.zoom, setZoom]
   );
 
-  // Pan
+  // Pan / Touch
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       if (e.button === 1 || (e.button === 0 && e.altKey) || state.activeTool === 'select') {
@@ -131,6 +142,27 @@ export function EditorCanvas() {
     [state.panX, state.panY, state.activeTool]
   );
 
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 1) {
+        setIsPanning(true);
+        panStartRef.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+          panX: state.panX,
+          panY: state.panY,
+        };
+      } else if (e.touches.length === 2) {
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        lastTouchDistRef.current = dist;
+      }
+    },
+    [state.panX, state.panY]
+  );
+
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (!isPanning) return;
@@ -141,8 +173,31 @@ export function EditorCanvas() {
     [isPanning, setPan]
   );
 
-  const handleMouseUp = useCallback(() => {
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 1 && isPanning) {
+        const dx = e.touches[0].clientX - panStartRef.current.x;
+        const dy = e.touches[0].clientY - panStartRef.current.y;
+        setPan(panStartRef.current.panX + dx, panStartRef.current.panY + dy);
+      } else if (e.touches.length === 2) {
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        if (lastTouchDistRef.current !== null) {
+          const delta = dist / lastTouchDistRef.current;
+          const newZoom = Math.max(0.05, Math.min(10, state.zoom * delta));
+          setZoom(newZoom);
+        }
+        lastTouchDistRef.current = dist;
+      }
+    },
+    [isPanning, setPan, setZoom, state.zoom]
+  );
+
+  const handleEnd = useCallback(() => {
     setIsPanning(false);
+    lastTouchDistRef.current = null;
   }, []);
 
   // Keyboard shortcuts
@@ -175,12 +230,16 @@ export function EditorCanvas() {
       className="w-full h-full relative"
       style={{
         cursor: isPanning ? 'grabbing' : state.activeTool === 'select' ? 'grab' : 'crosshair',
+        touchAction: 'none',
       }}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onMouseUp={handleEnd}
+      onMouseLeave={handleEnd}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleEnd}
     >
       <canvas
         ref={canvasRef}
@@ -189,16 +248,18 @@ export function EditorCanvas() {
       />
 
       {/* Zoom indicator */}
-      <div
-        className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg text-xs font-medium select-none"
-        style={{
-          background: 'var(--surface-2)',
-          border: '1px solid var(--border)',
-          color: 'var(--text-secondary)',
-        }}
-      >
-        {Math.round(state.zoom * 100)}%
-      </div>
+      {!isMobile && (
+        <div
+          className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg text-xs font-medium select-none"
+          style={{
+            background: 'var(--surface-2)',
+            border: '1px solid var(--border)',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          {Math.round(state.zoom * 100)}%
+        </div>
+      )}
     </div>
   );
 }
