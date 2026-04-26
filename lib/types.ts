@@ -113,7 +113,8 @@ export type EditorTool =
   | 'adjust'
   | 'resize'
   | 'layers'
-  | 'export';
+  | 'export'
+  | 'ai';
 
 export interface HistoryEntry {
   id: string;
